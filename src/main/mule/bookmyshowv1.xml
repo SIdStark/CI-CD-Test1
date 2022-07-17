@@ -156,4 +156,17 @@ output application/xml
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<flow name="bookmyshowv1Flow2" doc:id="8287d925-5492-4cee-99be-912833250a51" >
+		<http:listener doc:name="Listener" doc:id="ff9a9c1b-2cbb-413f-a65f-d371e716cee6" config-ref="HTTP_Listener_config" path="/citest"/>
+		<ee:transform doc:name="Transform Message" doc:id="2664a592-5af7-446c-a9ce-10dd08a7a07b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"ci test successful"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 </mule>
