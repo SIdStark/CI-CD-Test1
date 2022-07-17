@@ -1,0 +1,5 @@
+[
+  {
+    "groupBuyDiscountNumTickets": 6
+  }
+]

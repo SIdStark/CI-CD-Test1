@@ -2,19 +2,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.mycompany</groupId>
+	<groupId>d32cd8d6-1251-4e22-8a6d-0011c6753963</groupId>
 	<artifactId>bookmyshowv1</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>mule-application</packaging>
 
 	<name>bookmyshowv1</name>
 
+	<description/>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<app.runtime>4.4.0-20220221</app.runtime>
 		<mule.maven.plugin.version>3.5.4</mule.maven.plugin.version>
+		<tags/>
+		<categories>[]</categories>
+		<munit.version>2.3.9</munit.version>
 	</properties>
 
 	<build>
@@ -30,30 +34,29 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
-				<cloudHubDeployment>
+					<cloudHubDeployment>
 
-<uri>https://anypoint.mulesoft.com</uri>
+						<uri>https://anypoint.mulesoft.com</uri>
 
-<muleVersion>4.4.0</muleVersion>
+						<muleVersion>4.4.0</muleVersion>
 
-<username>SiddharthRavichandranJuly</username>
+						<username>SiddharthRavichandranJuly</username>
 
-<password>Siddharth1208@</password>
+						<password>Siddharth1208@</password>
 
-<applicationName>siddharth-app-cicd-github</applicationName>
+						<applicationName>siddharth1-app-cicd-github</applicationName>
 
-<environment>Sandbox</environment>
+						<environment>Sandbox</environment>
 
-<workerType>MICRO</workerType>
+						<workerType>MICRO</workerType>
 
-<region>us-east-2</region>
+						<region>us-east-2</region>
 
-<workers>1</workers>
+						<workers>1</workers>
 
-<objectStoreV2>true</objectStoreV2>
-</cloudHubDeployment>
+						<objectStoreV2>true</objectStoreV2>
+					</cloudHubDeployment>
 
-				
 					<sharedLibraries>
 						<sharedLibrary>
 							<groupId>mysql</groupId>
@@ -61,9 +64,29 @@
 						</sharedLibrary>
 					</sharedLibraries>
 				</configuration>
-				
-
-
+			</plugin>
+			<plugin>
+				<groupId>com.mulesoft.munit.tools</groupId>
+				<artifactId>munit-maven-plugin</artifactId>
+				<version>${munit.version}</version>
+				<executions>
+					<execution>
+						<id>test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+							<goal>coverage-report</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<coverage>
+						<runCoverage>true</runCoverage>
+						<formats>
+							<format>html</format>
+						</formats>
+					</coverage>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -97,6 +120,32 @@
 			<artifactId>mule-wsc-connector</artifactId>
 			<version>1.6.9</version>
 			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-objectstore-connector</artifactId>
+			<version>1.2.1</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-runner</artifactId>
+			<version>2.3.9</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.munit</groupId>
+			<artifactId>munit-tools</artifactId>
+			<version>2.3.9</version>
+			<classifier>mule-plugin</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.weave</groupId>
+			<artifactId>assertions</artifactId>
+			<version>1.0.2</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

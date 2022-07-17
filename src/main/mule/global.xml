@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f22c5804-f7fb-47e4-8bf4-6597ba1af630" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="0ddba984-da81-4332-ab11-ce30d2f718ef" >
-		<db:my-sql-connection host="bookmyshowdb.c2r67qvekefa.us-east-1.rds.amazonaws.com" port="3306" user="root" password="password" database="bookmyshow" />
+		<db:my-sql-connection host="database-1.c2r67qvekefa.us-east-1.rds.amazonaws.com" port="3306" user="sid" password="w1reless6" database="bookmyshow" />
 	</db:config>
 	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="c8c816e9-09a0-41a5-b258-c701fadf80e6" >
 		<wsc:connection wsdlLocation="C:\Users\siddharthrravichandr\eclipse-workspace\BookMyShowSOA\src\main\webapp\wsdl\GetMoviesClass.wsdl" service="GetMoviesClassService" port="GetMoviesClass" address="http://localhost:8084/BookMyShowSOA/services/GetMoviesClass" >
 			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
 		</wsc:connection>
 	</wsc:config>
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="e44c6025-f005-48c7-b6dc-97aa883e0e60" />
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="1e85d9ac-031a-45f3-8bba-ddc150b23f91" />
 </mule>

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
-	<flow name="GetMovies" doc:id="9f26e5a1-8a47-454b-8bf6-987d0f757a98" >
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<flow name="GetMoviesFlow" doc:id="9f26e5a1-8a47-454b-8bf6-987d0f757a98" >
 		<http:listener doc:name="Listener" doc:id="d69ea81f-dc20-4d2d-a9a6-8009bf99c7fd" config-ref="HTTP_Listener_config" path="/movies"/>
 		<db:select doc:name="Get Movie Details" doc:id="480cfdab-4fbf-41c4-81fd-5a8ad8605802" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT * from movies;]]></db:sql>
@@ -48,43 +49,58 @@ payload map (payloadSQL, payloadOutput) -> {
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="bookmyshowv1Flow1" doc:id="9e3ac176-1340-4415-9e3f-af04e80006da" >
+	<flow name="OrderTicketsFlow" doc:id="9e3ac176-1340-4415-9e3f-af04e80006da" >
 		<http:listener doc:name="Listener" doc:id="0b172102-c501-4d0a-b007-5062b47c4ad0" config-ref="HTTP_Listener_config" path="/order"/>
 		<set-variable value="#[attributes.queryParams.movieId]" doc:name="Set Movie Id" doc:id="05eba66b-e02c-40bc-bd51-9cf190e456db" variableName="movieId"/>
-		<logger level="INFO" doc:name="Logger" doc:id="82b1f7af-2ea4-427d-855a-ea07d9e67631" message="#[vars.movieId]"/>
-		<set-variable value="#[attributes.queryParams.numTickets]" doc:name="Set Number of Tickets" doc:id="55fa0dbe-f17e-4a32-866f-b1a75e72f233" variableName="numTickets"/>
-		<logger level="INFO" doc:name="Logger" doc:id="1adb4d49-52bf-4d1f-b191-27bc412f1f3a" message="#[vars.numTickets]"/>
-		<db:select doc:name="Select" doc:id="7b2561f1-117b-433f-ab1b-5a6836fea099" config-ref="Database_Config">
+		<os:store doc:name="Store Movie Id" doc:id="1c01d6d8-0cec-4520-9e84-3e478ea99bd7" key="movieId" objectStore="Object_store">
+			<os:value ><![CDATA[#[attributes.queryParams.movieId]]]></os:value>
+		</os:store>
+		<logger level="INFO" doc:name="Log Movie ID" doc:id="82b1f7af-2ea4-427d-855a-ea07d9e67631" message="#[vars.movieId]"/>
+		<set-variable value="#[attributes.queryParams.numTickets]" doc:name="Set Number of Tickets" doc:id="55fa0dbe-f17e-4a32-866f-b1a75e72f233" variableName="numTickets" />
+		<logger level="INFO" doc:name="Log Number of Tickets" doc:id="1adb4d49-52bf-4d1f-b191-27bc412f1f3a" message="#[vars.numTickets]" />
+		<os:store doc:name="Store Number Tickets" doc:id="7402650e-c16f-4bb4-bd34-29fdfcbd13ba" objectStore="Object_store" key="numTickets">
+			<os:value><![CDATA[#[attributes.queryParams.numTickets]]]></os:value>
+		</os:store>
+		<db:select doc:name="Select Movie Name" doc:id="7c1ed157-9283-4014-a6da-214b40e0636c" config-ref="Database_Config">
+			<db:sql><![CDATA[SELECT movieName,startTime,endTime,theatreName FROM movies WHERE movieId = :movieID ]]></db:sql>
+			<db:input-parameters><![CDATA[#[{'movieID':vars.movieId}]]]></db:input-parameters>
+		</db:select>
+		<set-variable value="#[payload.movieName[0]]" doc:name="Set Movie Name" doc:id="0bb621b8-5b84-4879-813f-e4278f559521" variableName="movieName"/>
+		<set-variable value="#[payload.startTime[0]]" doc:name="Set Start Time" doc:id="343e7182-9a46-464f-8269-03386287ee0d" variableName="startTime"/>
+		<set-variable value="#[payload.endTime[0]]" doc:name="Set End Time" doc:id="cd5ccb29-e825-4810-b829-d340de3e9819" variableName="endTime"/>
+		<set-variable value="#[payload.theatreName[0]]" doc:name="Set Theatre Name" doc:id="96ac7018-67f1-4550-bb75-8d9443ceeed4" variableName="theatreName"/>
+		<db:select doc:name="Get Available Tickets for Movie ID" doc:id="7b2561f1-117b-433f-ab1b-5a6836fea099" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT availabletickets FROM orders WHERE movieId = :movieID ]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{'movieID':vars.movieId}]]]></db:input-parameters>
 		</db:select>
-		<set-variable value="#[payload.availabletickets[0] as Number]" doc:name="Set Variable" doc:id="8bbf5dce-984e-408a-9ae0-198603742709" variableName="availableTickets"/>
-		<logger level="INFO" doc:name="Logger" doc:id="090f4ded-77e0-4c66-bcfd-34b8e445c029" message="Number of Available Tickets is #[vars.availableTickets]"/>
-		<choice doc:name="Choice" doc:id="a4f58be2-b717-4d02-8f24-d818bd0730dc" >
+		<set-variable value="#[payload.availabletickets[0] as Number]" doc:name="Set Available Tickets" doc:id="8bbf5dce-984e-408a-9ae0-198603742709" variableName="availableTickets"/>
+		<os:store doc:name="Store" doc:id="af495d11-4f8b-45a0-a8fc-02e6a68d57e0" key="availableTickets" objectStore="Object_store" />
+		<logger level="INFO" doc:name="Log Available Tickets" doc:id="090f4ded-77e0-4c66-bcfd-34b8e445c029" message="Number of Available Tickets is #[vars.availableTickets]"/>
+		<choice doc:name="Check if Order doesn't exceed Available Tickets" doc:id="a4f58be2-b717-4d02-8f24-d818bd0730dc" >
 			<when expression="#[vars.numTickets &lt;= vars.availableTickets]">
-				<db:update doc:name="Update" doc:id="752296fe-4ca7-45d8-8afa-003f25bae8aa" config-ref="Database_Config">
+				<db:update doc:name="Update Tickets After Booking" doc:id="752296fe-4ca7-45d8-8afa-003f25bae8aa" config-ref="Database_Config">
 					<db:sql ><![CDATA[UPDATE orders SET availabletickets = :ticketcount WHERE movieId=:movieID]]></db:sql>
 					<db:input-parameters ><![CDATA[#[{'ticketcount':((vars.availableTickets as Number) as String {format:"00"}) as Number - ((vars.numTickets as Number) as String {format:"00"}) as Number,
 'movieID':vars.movieId}]]]></db:input-parameters>
 				</db:update>
-				<db:select doc:name="Select" doc:id="58ee491e-5edd-4b93-9cde-16338b9cae65" config-ref="Database_Config">
+				<db:select doc:name="Select Tickets Needed for Group Discount" doc:id="58ee491e-5edd-4b93-9cde-16338b9cae65" config-ref="Database_Config">
 					<db:sql ><![CDATA[SELECT groupBuyDiscountNumTickets FROM orders WHERE movieId= :movieID]]></db:sql>
 					<db:input-parameters ><![CDATA[#[{'movieID':vars.movieId}]]]></db:input-parameters>
 				</db:select>
 				<set-variable value="#[payload.groupBuyDiscountNumTickets[0]]" doc:name="Set Group by discount Number of Tickets" doc:id="bfebb035-2688-48c2-8076-94c35f2e3271" variableName="groupTickets"/>
-				<db:select doc:name="Calculate Price" doc:id="1db09a8c-8e0d-46d8-905a-3c8c99a5f2ce" config-ref="Database_Config">
+				<db:select doc:name="Get Price of Selected Movie" doc:id="1db09a8c-8e0d-46d8-905a-3c8c99a5f2ce" config-ref="Database_Config">
 							<db:sql><![CDATA[SELECT ticketPrice from orders WHERE movieId= :movieID]]></db:sql>
 							<db:input-parameters><![CDATA[#[{'movieID':vars.movieId}]]]></db:input-parameters>
 						</db:select>
-				<set-variable value="#[payload.ticketPrice[0]]" doc:name="Set Variable" doc:id="e3e06bda-b75f-4d16-a574-bc12dc3dc6a8" variableName="ticketPrice" />
-				<db:select doc:name="Select" doc:id="fdef2a01-6cee-4465-b3f3-e778de3ca6b4" config-ref="Database_Config">
+				<set-variable value="#[payload.ticketPrice[0]]" doc:name="Set Ticket Price" doc:id="e3e06bda-b75f-4d16-a574-bc12dc3dc6a8" variableName="ticketPrice" />
+				<db:select doc:name="Get Discount Percentage" doc:id="fdef2a01-6cee-4465-b3f3-e778de3ca6b4" config-ref="Database_Config">
 							<db:sql><![CDATA[SELECT groupBuyDiscountPercentage from orders WHERE movieId= :movieID]]></db:sql>
 							<db:input-parameters><![CDATA[#[{'movieID':vars.movieId}]]]></db:input-parameters>
 						</db:select>
-				<set-variable value="#[payload.groupBuyDiscountPercentage[0]]" doc:name="Set Variable" doc:id="d1134b9c-5668-4892-9ce0-bacd4b2fc5fc" variableName="groupBuyDiscount" />
-				<choice doc:name="Choice" doc:id="7a30c525-4f1e-4697-8337-ae13b4863e8c" >
+				<set-variable value="#[payload.groupBuyDiscountPercentage[0]]" doc:name="Set Group Discount Percentage" doc:id="d1134b9c-5668-4892-9ce0-bacd4b2fc5fc" variableName="groupBuyDiscount" />
+				<choice doc:name="Choice between Group Discount Eligibility" doc:id="7a30c525-4f1e-4697-8337-ae13b4863e8c" >
 					<when expression='#[((vars.groupTickets as Number) as String {format:"00"} &lt;= (vars.numTickets as Number) as String {format:"00"} )]'>
-						<ee:transform doc:name="Transform Message" doc:id="ad942603-1d3d-4961-888b-72aad760e6f9" >
+						<ee:transform doc:name="Calculated Discounted Ticket Price" doc:id="ad942603-1d3d-4961-888b-72aad760e6f9" >
 							<ee:message >
 								<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -94,18 +110,30 @@ output application/json
 ]]></ee:set-payload>
 							</ee:message>
 						</ee:transform>
-						<set-variable value='#[((vars.numTickets as Number) as String {format:"00"}) as Number * ((vars.ticketPrice as Number) as String {format:"00"}) as Number * (100-((vars.groupBuyDiscount as Number) as String {format:"00"}) as Number)/100]' doc:name="Set Variable" doc:id="640fc126-bee5-4d97-bd19-6ad8e182c8d7" variableName="totalamount"/>
-						<ee:transform doc:name="Transform Message" doc:id="de48f6ba-4ca6-42c5-a69d-bd3e16ce9ddd" >
+						<set-variable value='#[((vars.numTickets as Number) as String {format:"00"}) as Number * ((vars.ticketPrice as Number) as String {format:"00"}) as Number]' doc:name="Set Total Price" doc:id="b59d029c-e611-47c9-b658-8e0ca42cfd7a" variableName="totalPrice"/>
+						<set-variable value='#[((vars.numTickets as Number) as String {format:"00"}) as Number * ((vars.ticketPrice as Number) as String {format:"00"}) as Number * (100-((vars.groupBuyDiscount as Number) as String {format:"00"}) as Number)/100]' doc:name="Set Discounted Ticket Price" doc:id="640fc126-bee5-4d97-bd19-6ad8e182c8d7" variableName="totalamount"/>
+						<set-variable value='#[((vars.numTickets as Number) as String {format:"00"}) as Number * ((vars.ticketPrice as Number) as String {format:"00"}) as Number * (((vars.groupBuyDiscount as Number) as String {format:"00"}) as Number)/100]' doc:name="Set Discounted Amount" doc:id="1284adf4-93d7-48ed-9a56-37c660f24693" variableName="discountedAmount"/>
+						<ee:transform doc:name="Return Discounted Price" doc:id="de48f6ba-4ca6-42c5-a69d-bd3e16ce9ddd" >
 							<ee:message >
 								<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-vars.totalamount]]></ee:set-payload>
+{
+"message":"Your E-Ticket has been generated",
+"movieName":vars.movieName,
+"startTime":vars.startTime,
+"endTime":vars.endTime,
+"theatreName":vars.theatreName,
+"numberTickets":vars.numTickets,	
+"totalPrice":vars.totalPrice,
+"discountedAmount":vars.discountedAmount,
+"finalAmount":vars.totalamount
+}]]></ee:set-payload>
 							</ee:message>
 						</ee:transform>
 					</when>
 					<otherwise >
-						<ee:transform doc:name="Transform Message" doc:id="77aced86-e0ed-4cda-b805-5ec66cf52983" >
+						<ee:transform doc:name="Calculate Ticket Price" doc:id="77aced86-e0ed-4cda-b805-5ec66cf52983" >
 							<ee:message >
 								<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -115,22 +143,46 @@ output application/json
 ]]></ee:set-payload>
 							</ee:message>
 						</ee:transform>
-						<set-variable value='#[((vars.numTickets as Number) as String {format:"00"}) as Number * ((vars.ticketPrice as Number) as String {format:"00"}) as Number]' doc:name="Set Variable" doc:id="e76b89b5-da25-440c-9a6e-50a7c4f8fd87" variableName="totalamount1"/>
-						<ee:transform doc:name="Transform Message" doc:id="e2f69400-a889-456a-8be8-907a5fa1abf3" >
+						<set-variable value='#[((vars.numTickets as Number) as String {format:"00"}) as Number * ((vars.ticketPrice as Number) as String {format:"00"}) as Number]' doc:name="Set Total Price" doc:id="be18b888-d4c3-4abd-b524-f8b39c01a3a9" variableName="totalPrice1"/>
+						<set-variable value='#[((vars.numTickets as Number) as String {format:"00"}) as Number * ((vars.ticketPrice as Number) as String {format:"00"}) as Number]' doc:name="Set Ticket Price" doc:id="e76b89b5-da25-440c-9a6e-50a7c4f8fd87" variableName="totalamount1"/>
+						<ee:transform doc:name="Return Price" doc:id="e2f69400-a889-456a-8be8-907a5fa1abf3" >
 							<ee:message >
 								<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-vars.totalamount1]]></ee:set-payload>
+{
+"message":"Your E-Ticket has been generated",
+"movieName":vars.movieName,
+"startTime":vars.startTime,
+"endTime":vars.endTime,
+"theatreName":vars.theatreName,
+"numberTickets":vars.numTickets,	
+"totalPrice":vars.totalPrice1,
+"discountedAmount":0.00,
+"finalAmount":vars.totalamount1
+
+}]]></ee:set-payload>
 							</ee:message>
 						</ee:transform>
 					</otherwise>
 				</choice>
 			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="5bb14e7c-ebe8-4eb0-be43-de95596c7e69" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Your Order Exceeds Tickets Available"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
 		</choice>
 	</flow>
-	<flow name="bookmyshowv1Flow" doc:id="b1d2708b-ac0e-499f-a6ab-1fcf4ac8b679" >
-		<http:listener doc:name="Listener" doc:id="69918efd-8f33-4344-8f26-df8b95cdb8ad" config-ref="HTTP_Listener_config" path="/soap"/>
+	<flow name="GetMoviesSOAPFLow" doc:id="b1d2708b-ac0e-499f-a6ab-1fcf4ac8b679" >
+		<http:listener doc:name="GetMoviesSOAP" doc:id="69918efd-8f33-4344-8f26-df8b95cdb8ad" config-ref="HTTP_Listener_config" path="/soap"/>
 		<ee:transform doc:name="Transform Message" doc:id="a7e9223a-14c7-47a4-afa1-e3eced876f8d" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -142,7 +194,7 @@ ns ns0 http://DefaultNamespace
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<wsc:consume operation="getMovieDeails" doc:name="Consume" doc:id="e9e48f03-04f9-4453-a9a9-f51f83ad5930" config-ref="Web_Service_Consumer_Config"/>
+		<wsc:consume operation="getMovieDeails" doc:name="Consume SOAP Service" doc:id="e9e48f03-04f9-4453-a9a9-f51f83ad5930" config-ref="Web_Service_Consumer_Config"/>
 		<logger level="INFO" doc:name="Logger" doc:id="05b3c55e-4142-4a81-9356-baf42eda8092" message="#[payload]"/>
 		<ee:transform doc:name="Transform Message" doc:id="3a434820-fb35-454b-a435-6c3b70bb3707" >
 			<ee:message >
@@ -156,8 +208,8 @@ output application/xml
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="bookmyshowv1Flow2" doc:id="8287d925-5492-4cee-99be-912833250a51" >
-		<http:listener doc:name="Listener" doc:id="ff9a9c1b-2cbb-413f-a65f-d371e716cee6" config-ref="HTTP_Listener_config" path="/citest1"/>
+	<flow name="CITestCheckFlow" doc:id="8287d925-5492-4cee-99be-912833250a51" >
+		<http:listener doc:name="CI Test Listener" doc:id="ff9a9c1b-2cbb-413f-a65f-d371e716cee6" config-ref="HTTP_Listener_config" path="/citest1"/>
 		<ee:transform doc:name="Transform Message" doc:id="2664a592-5af7-446c-a9ce-10dd08a7a07b" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0

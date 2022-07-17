@@ -1,0 +1,5 @@
+[
+  {
+    "groupBuyDiscountPercentage": 7
+  }
+]
