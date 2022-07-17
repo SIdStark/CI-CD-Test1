@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="0ddba984-da81-4332-ab11-ce30d2f718ef" >
-		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="bookmyshow" />
+		<db:my-sql-connection host="bookmyshowdb.c2r67qvekefa.us-east-1.rds.amazonaws.com" port="3306" user="root" password="password" database="bookmyshow" />
 	</db:config>
 	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="c8c816e9-09a0-41a5-b258-c701fadf80e6" >
 		<wsc:connection wsdlLocation="C:\Users\siddharthrravichandr\eclipse-workspace\BookMyShowSOA\src\main\webapp\wsdl\GetMoviesClass.wsdl" service="GetMoviesClassService" port="GetMoviesClass" address="http://localhost:8084/BookMyShowSOA/services/GetMoviesClass" >
